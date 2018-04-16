@@ -33,6 +33,34 @@ local function retrieve_token(request, conf)
   end
 end
 
+local function trim(str)
+  return (str:gsub("^%s*(.-)%s*$", "%1"))
+end
+
+local function compare_value(v1, v2)
+  if not (type(v2) == "string") then
+	return v1 == v2
+  end
+
+  for value in string.gmatch(v2, '([^,]+)') do
+    if v1 == trim(value) then
+      return true
+    end
+  end
+  return false
+end
+
+local function contains_value(claim_key, claim_value)
+  if type(claim_key) == "table" then
+    for _, v in ipairs(claim_key) do
+      if compare_value(v, claim_value) then
+        return true
+      end
+    end
+  end
+  return compare_value(claim_key, claim_value)
+end
+
 function JwtClaimsValidateHandler:new()
   JwtClaimsValidateHandler.super.new(self, "jwt-claims-headers")
 end
@@ -57,7 +85,7 @@ function JwtClaimsValidateHandler:access(conf)
 
   local claims = jwt.claims
   for claim_key,claim_value in pairs(conf.claims) do
-    if claims[claim_key] == nil or claims[claim_key] ~= claim_value then
+    if claims[claim_key] == nil or contains_value( claims[claim_key], claim_value ) == false then
       return responses.send_HTTP_UNAUTHORIZED("JSON Web Token has invalid claim value for '"..claim_key.."'")
     end
   end
