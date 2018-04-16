@@ -1,7 +1,7 @@
 package = "kong-plugin-jwt-claims-validate"
 version = "1.1-2"
 source = {
-   url = "https://github.com/zsh1313/kong-plugin-jwt-claims-validate.git",
+   url = "git+https://github.com/zsh1313/kong-plugin-jwt-claims-validate.git",
    tag = "v1.1"
 }
 description = {
