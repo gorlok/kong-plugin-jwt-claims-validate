@@ -96,7 +96,7 @@ function JwtClaimsValidateHandler:access(conf)
     return responses.send_HTTP_INTERNAL_SERVER_ERROR()
   end
 
-	local claims = jwt.claims
+	local claims = jwt.claims or {}
 	-- local scopes = claims["scope"]
 	for claim_key,claim_value in pairs(conf.claims) do
 		if(claim_key == "scope") then

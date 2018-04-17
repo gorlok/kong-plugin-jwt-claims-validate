@@ -2,7 +2,7 @@ local cjson = require "cjson"
 
 local function claim_check(value, conf)
   local valid_types = {
-    ["string"]  = true, 
+    ["string"]  = true,
     ["boolean"] = true,
 		["number"]  = true,
 		["array"] = true
