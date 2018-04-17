@@ -1,3 +1,4 @@
+local json = require "cjson"
 local BasePlugin = require "kong.plugins.base_plugin"
 local responses = require "kong.tools.responses"
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
@@ -5,6 +6,7 @@ local req_set_header = ngx.req.set_header
 local ngx_re_gmatch = ngx.re.gmatch
 
 local JwtClaimsValidateHandler = BasePlugin:extend()
+JwtClaimsValidateHandler.PRIORITY = 850
 
 local function retrieve_token(request, conf)
   local uri_parameters = request.get_uri_args()
@@ -50,7 +52,18 @@ local function compare_value(v1, v2)
   return false
 end
 
+local function has_value (tab, val)
+	for index, value in ipairs(tab) do
+		if value == val then
+				return true
+		end
+	end
+
+	return false
+end
+
 local function contains_value(claim_key, claim_value)
+	-- claim_key is the value of the claim in request, claim_value is the configured value
   if type(claim_key) == "table" then
     for _, v in ipairs(claim_key) do
       if compare_value(v, claim_value) then
@@ -83,12 +96,26 @@ function JwtClaimsValidateHandler:access(conf)
     return responses.send_HTTP_INTERNAL_SERVER_ERROR()
   end
 
-  local claims = jwt.claims
-  for claim_key,claim_value in pairs(conf.claims) do
-    if claims[claim_key] == nil or contains_value( claims[claim_key], claim_value ) == false then
-      return responses.send_HTTP_UNAUTHORIZED("JSON Web Token has invalid claim value for '"..claim_key.."'")
-    end
-  end
+	local claims = jwt.claims
+	-- local scopes = claims["scope"]
+	for claim_key,claim_value in pairs(conf.claims) do
+		if(claim_key == "scope") then
+			for scope in claim_value do
+				if not string.match(claims[claim_key], scope) then
+					return responses.send_HTTP_UNAUTHORIZED("JSON Web Token has invalid claim value for '"..claim_key.."'")
+				end
+			end
+		else
+			if claims[claim_key] == nil or contains_value( claims[claim_key], claim_value ) == false then
+				return responses.send_HTTP_UNAUTHORIZED("JSON Web Token has invalid claim value for '"..claim_key.."'")
+			end
+		end
+	end
+
+	-- Add claims to headers to upstream server
+	-- if claims ~= nil then
+	req_set_header("x-jwt-claims", json.encode(claims))
+	-- end
 end
 
 return JwtClaimsValidateHandler

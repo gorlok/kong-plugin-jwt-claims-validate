@@ -4,7 +4,7 @@ local function claim_check(value, conf)
   local valid_types = {
     ["string"]  = true, 
     ["boolean"] = true,
-    ["number"]  = true
+		["number"]  = true
   }
 
   for k,v in pairs(value) do
@@ -20,7 +20,11 @@ end
 return {
   no_consumer = true,
   fields = {
-    uri_param_names = {type = "array", default = {"jwt"}},
-    claims = { type = "table", func = claim_check }
+		uri_param_names = {type = "array", default = {"jwt"}},
+		-- claims = { type = "table", default = {}, func = claim_check }
+    claims = { type = "table", default = {}, schema = {
+			fields = {
+				scope = {type = "array", default= {""}}
+			}}, func = claim_check }
   }
 }
