@@ -84,15 +84,6 @@ local function compare_value(v1, v2)
   return false
 end
 
--- local function has_value (tab, val)
--- 	for index, value in ipairs(tab) do
--- 		if value == val then
--- 				return true
--- 		end
--- 	end
-
--- 	return false
--- end
 
 local function contains_value(claim_req_value, claim_conf_value)
 	-- claim_req_value is the value of the claim in request, claim_conf_value is the configured value
@@ -119,19 +110,9 @@ local function contains_value(claim_req_value, claim_conf_value)
   return compare_value(claim_req_value, claim_conf_value)
 end
 
--- local function contains_value(claim_key, claim_value)
---   if type(claim_key) == "table" then
---     for _, v in ipairs(claim_key) do
---       if compare_value(v, claim_value) then
---         return true
---       end
---     end
---   end
---   return compare_value(claim_key, claim_value)
--- end
 
 function JwtClaimsValidateHandler:new()
-  JwtClaimsValidateHandler.super.new(self, "jwt-claims-headers")
+  JwtClaimsValidateHandler.super.new(self, "jwt-claims-validate")
 end
 
 function JwtClaimsValidateHandler:access(conf)
@@ -153,32 +134,13 @@ function JwtClaimsValidateHandler:access(conf)
   end
 
 	local claims = jwt.claims
-	-- local scopes = claims["scope"]
 	for claim_key,claim_value in pairs(conf.claims) do
-
-
-
-		-- -- if claim_key == "scope" then
-		-- if type(claim_value) == "table" then
-		-- 	-- local reqScope = claims[claim_key]
-		-- 	ngx.log(ngx.DEBUG, "json.encode(claims) \"", json.encode(claims), "\"; claim_key: \"", claim_key, "\"; type of aud: ", type(claims["aud"]), ", type of https://mlib.visualid.com/roles: ", type(claims["https://mlib.visualid.com/roles"]))
-		-- 	for _, val in ipairs(claim_value) do
-		-- 		ngx.log(ngx.DEBUG, "configured scope \"", val, "\"")
-		-- 		if not string.find( claims[claim_key], val, 1, true ) then
-		-- 			return responses.send_HTTP_UNAUTHORIZED("Access Token has invalid claim value for '"..claim_key.."'")
-		-- 		end
-		-- 	end
-		-- else
 		if claims[claim_key] == nil or contains_value( claims[claim_key], claim_value ) == false then
 			return responses.send_HTTP_UNAUTHORIZED("Access Token has invalid claim value for '"..claim_key.."'")
 		end
-		-- end
 	end
 
-	-- Add claims to headers to upstream server
-	-- if claims ~= nil then
 	req_set_header("x-jwt-claims", json.encode(claims))
-	-- end
 end
 
 return JwtClaimsValidateHandler

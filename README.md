@@ -54,11 +54,27 @@ This will check the JWT payload body to at least include the following JSON
 
 ```JSON
 {
-  "username": "wshirey",
+  "username": "argento",
   "id": 19829132,
   "is_admin": true
 }
 ```
+
+Claims with Scopes:
+
+```bash
+curl -X POST http://localhost:8001/apis/myapi1/plugins \
+  -d '{
+    "name": "jwt-claims-validate",
+    "config": {
+      "uri_param_names": "jwt",
+      "claims": {
+        "scope": ["MYAPI1"]
+      }
+    }
+  }'
+```
+
 
 > The plugin only supports scalar values, so if you have a nested JSON array or
 > object in the payload body, it will not iterate over the values to check if it

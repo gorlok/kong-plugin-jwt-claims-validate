@@ -5,6 +5,7 @@ local function claim_check(value, conf)
     ["string"]  = true,
     ["boolean"] = true,
 		["number"]  = true,
+		["table"]  = true,
 		["array"] = true
   }
 
@@ -22,7 +23,6 @@ return {
   no_consumer = true,
   fields = {
 		uri_param_names = {type = "array", default = {"jwt"}},
-		-- claims = { type = "table", default = {}, func = claim_check }
     claims = { type = "table", default = {}, schema = {
 			fields = {
 				scope = {type = "array", default= {""}}
